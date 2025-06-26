@@ -6,15 +6,14 @@ import (
 	"link-shorter/pkg/service/pagination"
 	"link-shorter/pkg/types"
 	"net/http"
-	"time"
 )
 
 type FullLinkResponse struct {
 	ID        types.PrimaryKey `json:"id"`
 	URL       string           `json:"url"`
 	Hash      string           `json:"hash"`
-	CreatedAt time.Time        `json:"created_at" time_format:"2006-01-02"`
-	UpdatedAt time.Time        `json:"updated_at" time_format:"2006-01-02"`
+	CreatedAt string           `json:"created_at"`
+	UpdatedAt string           `json:"updated_at"`
 }
 
 /** Create DTOs */

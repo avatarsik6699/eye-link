@@ -52,15 +52,14 @@ func NewLinkHandler(
 		),
 	))
 
+	r.HandleFunc("GET /link/goto/{hash}", h.GoTo())
+	r.HandleFunc("GET /link/details/{id}", h.GoTo())
 	r.HandleFunc("GET /link", middleware.WithDecoder(
 		func() types.Decoder { return &FindAllRequestDTO{} },
 		middleware.WithValidator[*FindAllRequestDTO](
 			h.FindAll(),
 		),
 	))
-
-	r.HandleFunc("GET /link/goto/{hash}", h.GoTo())
-	r.HandleFunc("GET /link/details/{id}", h.GoTo())
 
 	return h
 }
@@ -126,6 +125,7 @@ func (h *LinkHandler) GoTo() http.HandlerFunc {
 		if err != nil {
 			api.SendCustomError(w, http.StatusNotFound, err)
 		} else {
+			// TODO: Need to use common method
 			realIP := middleware.GetRealIP(r)
 
 			h.eventManager.Pub(
@@ -133,6 +133,7 @@ func (h *LinkHandler) GoTo() http.HandlerFunc {
 					Type: events.EventLinkGoTo,
 					Payload: events.LinkGoToEvent{
 						LinkID: targetLinkToRedirect.ID,
+						// TODO:
 						// Также стоит рассмотреть ограничение длины этих полей в базе данных для предотвращения DoS атак через очень длинные заголовки.
 						// UserAgent - может быть пустым или содержать невалидные данные от ботов/скриптов, но это нормально для аналитики.
 						// Referer - может быть пустым (прямые переходы, HTTPS→HTTP, privacy settings) или содержать вредоносные данные. Лучше добавить валидацию:

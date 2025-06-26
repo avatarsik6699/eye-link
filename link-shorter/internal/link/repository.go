@@ -101,7 +101,13 @@ func (r *LinkRepository) FindOneByHash(hash string) (*FindOneResponseDTO, error)
 	if tx := r.db.Instance.
 		Model(&Link{}).
 		// NB: возможно это поле ненужно, поля и так смаппятся в структуру
-		Select("id, url, hash, created_at, updated_at").
+		Select(`
+			id,
+			url,
+			hash,
+			to_char(created_at, 'YYYY-MM-DD HH24:MI') as created_at,
+			to_char(updated_at, 'YYYY-MM-DD HH24:MI') as updated_at
+		`).
 		Where(`hash = ?`, hash).
 		// NB: Проблема в том, что gorm.Scan() не возвращает gorm.ErrRecordNotFound при отсутствии записей
 		First(&result); tx.Error != nil {
@@ -119,7 +125,15 @@ func (r *LinkRepository) FindAll(dto FindAllRequestDTO) (*FindAllResponseDTO, er
 	var links []FindAllItemDTO
 	var count int64
 
-	sql := r.db.Instance.Model(&Link{}).Select("id, url, hash, created_at, updated_at")
+	sql := r.db.Instance.
+		Model(&Link{}).
+		Select(`
+			id,
+			url,
+			hash,
+			to_char(created_at, 'YYYY-MM-DD HH24:MI') as created_at,
+			to_char(updated_at, 'YYYY-MM-DD HH24:MI') as updated_at
+		`)
 
 	if tx := sql.Count(&count); tx.Error != nil {
 		return nil, tx.Error

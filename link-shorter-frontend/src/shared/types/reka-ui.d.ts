@@ -1,10 +1,19 @@
 import type { ImgHTMLAttributes } from 'vue'
-// src/types/reka-ui.d.ts
 import 'reka-ui'
 
 declare module 'reka-ui' {
-  interface AvatarImageProps {
-    'data-slot'?: string
-    'alt'?: ImgHTMLAttributes['alt']
+  interface AvatarRootProps {
+    dataSlot: string
+    alt?: ImgHTMLAttributes['alt']
+  }
+
+  interface ComponentCustomProps {
+    dataSlot: string
+    as: AsTag | Component
+  }
+
+  interface AllowedComponentProps {
+    dataSlot: string
+    as: AsTag | Component
   }
 }

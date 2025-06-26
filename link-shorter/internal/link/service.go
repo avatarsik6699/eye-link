@@ -3,7 +3,6 @@ package link
 import (
 	"errors"
 	"link-shorter/pkg/types"
-	"log"
 )
 
 type LinkService struct {
@@ -27,8 +26,6 @@ func (s *LinkService) Create(dto CreateReqestDTO) (*CreateResponseDTO, error) {
 	*/
 	if dto.Hash != "" {
 		existsLink, err := s.linkRepository.FindOneByHash(dto.Hash)
-
-		log.Println("@@@@@", existsLink, err)
 
 		if existsLink != nil {
 			return nil, ErrLinkWithHashAlreadyExists
