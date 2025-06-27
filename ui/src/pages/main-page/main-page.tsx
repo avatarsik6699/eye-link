@@ -6,6 +6,7 @@ import LinkEditor from "./ui/link-editor";
 import CreateLinkButton from "./ui/create-link-button";
 import DisplaySettings from "./ui/display-settings/display-settings";
 import Filters, { type FiltersProps } from "./ui/filters";
+import { Link } from "@tanstack/react-router";
 
 const links = Array.from({ length: 10 }).map(() => {
   return {};
@@ -70,6 +71,7 @@ const MainPage: FC = () => {
 
   return (
     <>
+
       <Container size="xl">
         <Grid justify="space-between">
           <Grid.Col styles={{ col: { display: "flex", gap: "var(--mantine-spacing-xs)" } }} span={8}>
