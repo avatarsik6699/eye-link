@@ -1,4 +1,4 @@
-import { Box, Container, Divider, Grid, rem } from "@mantine/core";
+import { Box, Container, Divider, Grid, Group, rem } from "@mantine/core";
 import type { FC } from "react";
 import LinkCard from "./ui/link-card";
 import { useDisclosure } from "@mantine/hooks";
@@ -7,6 +7,7 @@ import CreateLinkButton from "./ui/create-link-button";
 import DisplaySettings from "./ui/display-settings/display-settings";
 import Filters, { type FiltersProps } from "./ui/filters";
 import { Link } from "@tanstack/react-router";
+import SearchBySlug from "./ui/search-by-slug";
 
 const links = Array.from({ length: 10 }).map(() => {
   return {};
@@ -14,55 +15,70 @@ const links = Array.from({ length: 10 }).map(() => {
 
 const filters: FiltersProps["items"] = [
   {
-    id: 1,
+    id: "authors",
     value: "authors",
     label: "Авторы",
     children: [
       {
-        id: 11,
+        id: "11",
         value: "john-doe",
         label: "John Doe",
       },
       {
-        id: 12,
+        id: "12",
         value: "jane-smith",
         label: "Jane Smith",
       },
     ],
   },
   {
-    id: 2,
+    id: "tags",
     value: "tags",
     label: "Теги",
     children: [
       {
-        id: 21,
+        id: "21",
         value: "react",
         label: "React",
       },
       {
-        id: 22,
+        id: "22",
         value: "typescript",
         label: "TypeScript",
       },
     ],
   },
   {
-    id: 3,
+    id: "statuses",
     value: "statuses",
     label: "Статусы",
     children: [
       {
-        id: 31,
+        id: "31",
         value: "active",
         label: "Активные",
       },
       {
-        id: 32,
+        id: "32",
         value: "inactive",
         label: "Неактивные",
       },
     ],
+  },
+  {
+    id: "4",
+    value: "simple1",
+    label: "Просто значение 1",
+  },
+  {
+    id: "5",
+    value: "simple2",
+    label: "Просто значение 2",
+  },
+  {
+    id: "6",
+    value: "simple3",
+    label: "Просто значение 1",
   },
 ];
 
@@ -71,10 +87,9 @@ const MainPage: FC = () => {
 
   return (
     <>
-
       <Container size="xl">
-        <Grid justify="space-between">
-          <Grid.Col styles={{ col: { display: "flex", gap: "var(--mantine-spacing-xs)" } }} span={8}>
+        <Group justify="space-between">
+          <Group>
             <DisplaySettings />
             <Divider
               color="dark.0"
@@ -89,11 +104,12 @@ const MainPage: FC = () => {
               }}
             />
             <Filters items={filters} />
-          </Grid.Col>
-          <Grid.Col styles={{ col: { display: "flex", justifyContent: "flex-end" } }} span={2}>
+          </Group>
+          <Group>
             <CreateLinkButton />
-          </Grid.Col>
-        </Grid>
+            <SearchBySlug />
+          </Group>
+        </Group>
 
         <Grid>
           {links.map(() => (

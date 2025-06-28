@@ -1,35 +1,22 @@
-import { createRootRoute, createRoute, createRouter, Link, Outlet, redirect } from "@tanstack/react-router";
-import App from "../app";
-import MainPage from "../../pages/main-page/main-page";
-import { z } from 'zod'
-
-const rootRoute = createRootRoute({
-  component: App,
-  notFoundComponent: () => <div>404 Not Found</div>
-});
-
-const indexRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/",
-  component: MainPage,
-});
+import { createRoute, createRouter, Link, Outlet } from "@tanstack/react-router";
+import { z } from "zod";
+import { mainRoute } from "./routes/main/route";
+import { rootRoute } from "./routes/root/route";
 
 const productSearchSchema = z.object({
   page: z.number().default(1),
-  filter: z.string().default(''),
-  sort: z.enum(['newest', 'oldest', 'price']).default('newest'),
-})
+  filter: z.string().default(""),
+  sort: z.enum(["newest", "oldest", "price"]).default("newest"),
+});
 
 const aboutPage = createRoute({
   getParentRoute: () => rootRoute,
   path: "/about",
   validateSearch: productSearchSchema,
   component: () => {
-    return <>
-    about
-    </>
+    return <>about</>;
   },
-})
+});
 
 // Пример pathless роута для проверки авторизации
 const protectedRoute = createRoute({
@@ -40,14 +27,12 @@ const protectedRoute = createRoute({
     // if (true) {
     //   throw redirect({ to: "/" });
     // }
-    console.log(context)
+    console.log(context);
   },
   component: function ProtectedLayout() {
     return (
       <div>
-        <div style={{ padding: '0.5rem', backgroundColor: '#e3f2fd', marginBottom: '1rem' }}>
-          🔒 Защищенная область
-        </div>
+        <div style={{ padding: "0.5rem", backgroundColor: "#e3f2fd", marginBottom: "1rem" }}>🔒 Защищенная область</div>
         <Link to="/about">go to about</Link>
         <Outlet />
       </div>
@@ -84,11 +69,7 @@ const settingsRoute = createRoute({
 });
 
 export const router = createRouter({
-  routeTree: rootRoute.addChildren([
-    indexRoute,
-    aboutPage,
-    protectedRoute.addChildren([profileRoute, settingsRoute])
-  ]),
+  routeTree: rootRoute.addChildren([mainRoute, aboutPage, protectedRoute.addChildren([profileRoute, settingsRoute])]),
 });
 
 declare module "@tanstack/react-router" {

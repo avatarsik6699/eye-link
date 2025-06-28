@@ -1,7 +1,6 @@
-import { Box, Button, Combobox, Group, Kbd, rem, Text, useCombobox } from "@mantine/core";
+import { Box, Button, Combobox, Flex, Group, Kbd, rem, Text, useCombobox } from "@mantine/core";
 import { useElementSize } from "@mantine/hooks";
-import { useSearch as useSearchParams } from "@tanstack/react-router";
-import { useMemo, type FC } from "react";
+import { Children, useMemo, type FC } from "react";
 import { LuListFilter, LuSearch } from "react-icons/lu";
 import { useSearchState } from "../../../../shared/hooks/use-search-state";
 import { useAnimation } from "../../../../shared/hooks/useAnimation";
@@ -10,11 +9,14 @@ import Chevrone from "../../../../shared/ui/enhanced-icons/chevron";
 import { useKeyboard } from "./model/useKeyboard";
 import cn from "./styles.module.css";
 import type { FiltersTypes } from "./types";
+import { useSearchParams } from "./model/useSearchParams";
+import { LuChevronRight } from "react-icons/lu";
 
 declare module "@mantine/core" {
   interface ComboboxOptionProps {
     metadata: {
       label: string;
+      id: string;
       children?: FiltersTypes.Filter[];
     };
   }
@@ -47,12 +49,12 @@ type Props = {
 const Filters: FC<Props> = (props) => {
   const pages = useStack<FiltersTypes.Page>();
   const scaleAnimation = useAnimation();
-  // const searchParams = useSearchParams({ from: "/" });
   const search = useSearchState();
+  const sp = useSearchParams();
+
   const combobox = useCombobox({
     loop: true,
     onDropdownClose: () => {
-      combobox.resetSelectedOption();
       combobox.focusTarget();
       pages.reset();
       search.reset();
@@ -77,18 +79,49 @@ const Filters: FC<Props> = (props) => {
       pages.pop();
     },
   });
-
+  console.log(sp.state)
   const JSXOptions = useMemo(() => {
     const items = pages.isInitialPage ? props.items : pages.last().children;
 
     return items
       .filter((item) => item.label.toLowerCase().includes(search.value))
-      .map((item) => (
-        <Combobox.Option metadata={{ label: item.label, children: item.children }} value={item.value} key={item.id}>
-          {item.label}
-        </Combobox.Option>
-      ));
-  }, [pages, props.items, search.value]);
+      .map((item) => {
+        let isSelected = false;
+        let selectedCount = 0;
+        console.log(sp)
+        if (pages.isInitialPage) {
+          if (item.id in sp.state) {
+            if (item.children) {
+              selectedCount = (sp.state[item.id as keyof FiltersTypes.State] as string[]).length;
+            } else {
+              isSelected = true;
+            }
+          }
+        } else {
+          const parent = pages.last();
+          console.log(sp.state, item.value)
+          if (parent.id in sp.state) {
+            isSelected = (sp.state[parent.id as keyof FiltersTypes.State] as string[]).includes(item.value);
+          }
+        }
+
+        return (
+          <Combobox.Option
+            metadata={{ label: item.label, children: item.children, id: item.id }}
+            selected={isSelected}
+            value={item.value}
+            key={item.id}>
+            <Group align="center" justify="space-between">
+              {item.label}
+              <Group>
+                {selectedCount}
+                {item.children && <LuChevronRight size={16} />}
+              </Group>
+            </Group>
+          </Combobox.Option>
+        );
+      });
+  }, [pages, props.items, search.value, sp]);
 
   return (
     <Combobox
@@ -97,11 +130,24 @@ const Filters: FC<Props> = (props) => {
       transitionProps={{ transition: "scale" }}
       store={combobox}
       onOptionSubmit={(value, { metadata }) => {
-        const { children, label } = metadata;
-
+        const { children, label, id } = metadata;
+        console.log(value);
         if (children) {
-          pages.append({ children, label });
+          pages.append({ children, label, id });
         } else {
+          if (!pages.isInitialPage) {
+            // TODO: пока что эта логика подходит только для 1 уровня вложенности.
+            sp.set(pages.last().id, value);
+          } else {
+            sp.set(id, Boolean(value));
+          }
+          // Если попал на простой фильтр
+          // То добавляю его в {[key]: [value]}
+
+          // Если попал на вложенный фильтр (как проверить?)
+          // Если !pages.isInitialPage
+          // Тгда {[parent]: [value]}
+
           // TODO: append to URL
           // setSelectedItem(value);
           // combobox.closeDropdown();
@@ -155,7 +201,14 @@ const Filters: FC<Props> = (props) => {
             placeholder={pages.isInitialPage ? "Что ищем?" : `${pages.last().label}...`}
             onKeyDown={keyboard}
           />
-          <Combobox.Options>
+          <Combobox.Options
+            styles={{
+              options: {
+                flexDirection: "column",
+                gap: rem(4),
+              },
+            }}
+            component={Flex}>
             {JSXOptions.length > 0 && JSXOptions}
             {JSXOptions.length === 0 && <Combobox.Empty>Nothing found</Combobox.Empty>}
           </Combobox.Options>
